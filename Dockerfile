@@ -1,10 +1,7 @@
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
-# FROM mcr.microsoft.com/devcontainers/miniconda:3
-FROM mambaorg/micromamba:1.3.1
+FROM mambaorg/micromamba:1.3.1 as micromamba
 
-# # Fix: https://github.com/hadolint/hadolint/wiki/DL4006
-# # Fix: https://github.com/koalaman/shellcheck/wiki/SC3014
+FROM debian:bullseye
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh &&
@@ -20,30 +17,39 @@ RUN apt-get update --yes && \
     cm-super \
     dvipng \
     # for matplotlib anim
-    ffmpeg && \
+    ffmpeg \
+    ca-certificates && \
+    update-ca-certificates &&\
     apt-get clean 
 
+ARG MAMBA_USER=mamba
+ARG MAMBA_USER_ID=1000
+ARG MAMBA_USER_GID=1000
+ENV MAMBA_USER=$MAMBA_USER
+ENV MAMBA_ROOT_PREFIX="/opt/conda"
+ENV MAMBA_EXE="/bin/micromamba"
+
+COPY --from=micromamba "$MAMBA_EXE" "$MAMBA_EXE"
+COPY --from=micromamba /usr/local/bin/_activate_current_env.sh /usr/local/bin/_activate_current_env.sh
+COPY --from=micromamba /usr/local/bin/_dockerfile_shell.sh /usr/local/bin/_dockerfile_shell.sh
+COPY --from=micromamba /usr/local/bin/_entrypoint.sh /usr/local/bin/_entrypoint.sh
+COPY --from=micromamba /usr/local/bin/_activate_current_env.sh /usr/local/bin/_activate_current_env.sh
+COPY --from=micromamba /usr/local/bin/_dockerfile_initialize_user_accounts.sh /usr/local/bin/_dockerfile_initialize_user_accounts.sh
+COPY --from=micromamba /usr/local/bin/_dockerfile_setup_root_prefix.sh /usr/local/bin/_dockerfile_setup_root_prefix.sh
+
+RUN /usr/local/bin/_dockerfile_initialize_user_accounts.sh && \
+    /usr/local/bin/_dockerfile_setup_root_prefix.sh
+
+USER $MAMBA_USER
+
+SHELL ["/usr/local/bin/_dockerfile_shell.sh"]
+
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh"]
+
+RUN echo "The mamba user is $MAMBA_USER"
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER env.yaml /tmp/env.yaml
 RUN micromamba install -y -n base -f /tmp/env.yaml && \
     micromamba clean --all --yes
-
-USER ${NB_UID}
-
-# Install facets which does not have a pip or conda package at the moment
-WORKDIR /tmp
-RUN git clone https://github.com/PAIR-code/facets.git && \
-    jupyter nbextension install facets/facets-dist/ --sys-prefix && \
-    rm -rf /tmp/facets && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
-
-# Import matplotlib the first time to build the font cache.
-ENV XDG_CACHE_HOME="/home/${NB_USER}/.cache/"
-
-RUN MPLBACKEND=Agg python -c "import matplotlib.pyplot" && \
-    fix-permissions "/home/${NB_USER}"
-
-USER ${NB_UID}
-
-WORKDIR "${HOME}"
+ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python will not be found)
+RUN python -c 'import uuid; print(uuid.uuid4())' > /tmp/my_uuid
