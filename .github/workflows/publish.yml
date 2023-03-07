@@ -2,6 +2,7 @@ name: publish
 on: [push]
 jobs:
   publish-pymc3-docker:
+    name: Does this need a name
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
