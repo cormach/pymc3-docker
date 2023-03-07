@@ -13,8 +13,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-       - name: Build the Docker Image
-         run: |
+      - name: Build the Docker Image
+        run: |
           docker build . --tag ghcr.io/cormach/pymx3-docker:latest
           docker run ghcr.io/cormach/pymx3-docker:latest
           docker push ghcr.io/cormach/pymx3-docker:latest
