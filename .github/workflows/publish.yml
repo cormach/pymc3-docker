@@ -16,5 +16,5 @@ jobs:
       - name: Build the Docker Image
         run: |
           docker build . --tag ghcr.io/cormach/pymc3-docker:latest
-          docker run ghcr.io/cormach/pymx3-docker:latest
+          docker run ghcr.io/cormach/pymc3-docker:latest
           docker push ghcr.io/cormach/pymc3-docker:latest
