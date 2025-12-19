@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:1.3.1 as micromamba
+FROM mambaorg/micromamba:1.3.1 AS micromamba
 
 FROM debian:bullseye
 
