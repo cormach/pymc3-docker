@@ -18,6 +18,7 @@ RUN apt-get update --yes && \
     dvipng \
     # for matplotlib anim
     ffmpeg \
+    glibc \
     ca-certificates && \
     update-ca-certificates &&\
     apt-get clean 
