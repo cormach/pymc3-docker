@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:1.3.1 as micromamba
+FROM mambaorg/micromamba:2.4.0 AS micromamba
 
 FROM debian:bullseye
 
@@ -12,6 +12,7 @@ RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
     # for cython: https://cython.readthedocs.io/en/latest/src/quickstart/install.html
     build-essential \
+    python3-dev \
     git \
     # for latex labels
     cm-super \
