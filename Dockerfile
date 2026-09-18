@@ -1,6 +1,6 @@
-FROM mambaorg/micromamba:2.4.0 AS micromamba
+FROM mambaorg/micromamba:2.9.0 AS micromamba
 
-FROM debian:bullseye
+FROM debian:trixie
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
