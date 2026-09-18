@@ -19,9 +19,16 @@ RUN apt-get update --yes && \
     dvipng \
     # for matplotlib anim
     ffmpeg \
+    # for pm.model_to_graphviz (python-graphviz is only the wrapper)
+    graphviz \
+    # for ps/top/free when debugging samplers
+    procps \
+    less \
+    curl \
     ca-certificates && \
     update-ca-certificates &&\
-    apt-get clean 
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ARG MAMBA_USER=mamba
 ARG MAMBA_USER_ID=1000
